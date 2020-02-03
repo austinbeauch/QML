@@ -127,3 +127,13 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+
+bernstein-vazirani.ipynb
+deutsch-josza.ipynb
+grover.ipynb
+quantum-fourier-transform.ipynb
+quantum-phase-estimation.ipynb
+simon.ipynb
+teleportation.ipynb
+vqe-molecules.ipynb
