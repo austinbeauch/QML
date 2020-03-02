@@ -141,7 +141,7 @@
     \def\gt{>}
     \def\lt{<}
     % Document parameters
-    \title{basics}
+    \title{Quantum Computing Basics}
     
     
     
@@ -305,6 +305,12 @@ particle.
 For example, if a particle has a wave function defined by a sine
 function on the interval \([0, \pi]\), the PDF will look like:
 
+\begin{figure}
+\centering
+\includegraphics{images/sin_pdf.png}
+\caption{}
+\end{figure}
+
     Notice that the function has some normalization constant out front. This
 is required as the total probability for existence must be equal to one.
 Mathematically, the normalization constant can be found by integrating
@@ -325,13 +331,14 @@ future sections.
     \subsubsection{Dirac Notation}\label{dirac-notation}
 
     Before continuing into quantum mechanics, it is important to establish a
-new style for representing linear algebra. Dirac notation, also known as
-Bra-Ket notation, allows us to easily represent quantum states. Bra-ket
-notation uses two new vector representations, bras and kets, which are
-equivalent to row vectors and column vectors, respectively. Bras are
-represented as \[\langle a |\] and kets by \[| b \rangle\]
+different style for representing linear algebra. Dirac notation, also
+known as Bra-Ket notation, allows us to easily represent quantum states.
+Bra-ket notation uses two new vector representations, bras and kets,
+which are equivalent to row vectors and column vectors, respectively.
+Bras are represented as \[\langle a |\] and kets by \[| b \rangle\]
 
-We define general length two bras and kets for example purposes:
+We define some general bras and kets, each with two elements, for
+example purposes:
 
 \[\langle a | = \begin{pmatrix} a_1 \ a_2 \end{pmatrix}\]
 
@@ -356,7 +363,11 @@ And a normal linear algebra dot product is represented by
 
 \[\langle a | b \rangle = \begin{pmatrix} a_1 \ a_2 \end{pmatrix} \cdot \begin{pmatrix} b_1 \\ b_2 \end{pmatrix} = a_1b_1 + a_2b_2\]
 
-which is referred to as the \emph{inner product}.
+which is referred to as the \emph{inner product}. Reversing the ordering
+of thse bra/ket results in matrix multiplication, also known as the
+\emph{outer product}.
+
+\[ | b \rangle \langle a | = \begin{pmatrix} b_1 \\ b_2 \end{pmatrix} \begin{pmatrix} a_1 \ a_2 \end{pmatrix}  = \begin{pmatrix} b_1a_1 & b_1a_2 \\ b_2a_1 & b_2a_2 \end{pmatrix} \]
 
     \subsubsection{Basis Vectors and
 Superposition}\label{basis-vectors-and-superposition}
@@ -372,34 +383,34 @@ in the \(|0\rangle\) state will have an output measurement of 0, and a
 particle in the state \(|1\rangle\) state will have an output
 measurement of 1, \emph{when taking a z measurement}.
 
-However, and this is where quantum particles differ from classical
-particle, the particle can exist in a state which will produce
-difference z measurements. It is possible for a particle to be in a
-\emph{linear combination} of states. For example, a particle might be in
-the state \(|\psi\rangle = \alpha|0\rangle + \beta|1\rangle\), where
-\(\alpha\) and \(\beta\) are constants, with
-\(|\alpha|^2 + |\beta|^2 = 1\), which is our normalization condition.
-\(|\alpha|^2\) and \(|\beta|^2\) represent the probability of the z
-measurement to result in a 0 or 1, respectively. The particle existing
-in this linear combination of states is referred to as
-\emph{superposition}.
+It is possible for a particle to be in a \emph{linear combination} of
+states. For example, a particle might be in the general state
+\[|\psi\rangle = \alpha|0\rangle + \beta|1\rangle\] where \(\alpha\) and
+\(\beta\) are constants. Quantum states must also always be normalized
+meaning \(|\alpha|^2 + |\beta|^2 = 1\). The particle existing in this
+linear combination of states is referred to as \emph{superposition}.
+When measuring a qubit, the resulting output will either be a 0 or a 1,
+meaning that our superposition state is not directly observable. When
+measuring the state \(|\psi\rangle\), the probability of meauring a 0
+will be \(|\alpha|^2\), and the probability of measusing 1 will be
+\(|\beta|^2\).
 
 Let us solve for a state which has equal probabilities for the outcome
-of a z measurement. In other words,
+of a z measurement. Equal probabilities means
+\(|\alpha|^2 = |\beta|^2\), and using our normalization condition we can
+solve for the constants.
 
-\[\alpha^2 + \beta^2 = 1\]
+\[|\alpha|^2 + |\beta|^2 = 1\]
 
-\[\alpha^2 = \beta^2\]
-
-\[2\alpha^2 = 1\]
+\[2|\alpha|^2 = 1\]
 
 \[\alpha = \frac{1}{\sqrt{2}}\]
 
 \[\implies |\psi\rangle = \frac{1}{\sqrt{2}}(|0\rangle + |1\rangle)\]
 
-In the future we will see that measuring a particle in this state will
-result in equal measurements of 0 and 1. The state we just produced is
-considered the \textbf{x basis}, with the state symbols given as
+We will see that measuring a particle in this state will result in equal
+measurements of 0 and 1. The state we just produced is considered the
+\textbf{x basis}, with the state symbols given as
 
 \[|+\rangle = \frac{1}{\sqrt{2}}(|0\rangle + |1\rangle)\]
 
@@ -434,8 +445,28 @@ unit sphere representing the possible linear combinations between the x,
 y, and z basis. The following figure shows the Block sphere, with a
 vector representing the \(|0\rangle\) state.
 
+\begin{figure}
+\centering
+\includegraphics{images/bloch_0.png}
+\caption{}
+\end{figure}
+
     The \(|+\rangle\) state points purely along the x axis, which is halfway
 between \(|0\rangle\) and \(|1\rangle\).
+
+\begin{figure}
+\centering
+\includegraphics{images/bloch_+.png}
+\caption{}
+\end{figure}
+
+And the \(|\circlearrowright\rangle\) state is along the y axis.
+
+\begin{figure}
+\centering
+\includegraphics{images/bloch_y.png}
+\caption{}
+\end{figure}
 
     Along with the three sets of basis vectors, measurements are made for a
 single base. The default measurement used in Qiskit measures the z
@@ -475,6 +506,10 @@ are
 
 \[
 Z |+\rangle = |-\rangle, \\\\ Z |-\rangle = |+\rangle.
+\]
+
+\[
+Y |0\rangle = i|1\rangle, \\\\ Y |1\rangle = -i|0\rangle.
 \]
 
 These are just a couple examples of how qubits can be manipulated. The

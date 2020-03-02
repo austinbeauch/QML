@@ -137,3 +137,5 @@ quantum-phase-estimation.ipynb
 simon.ipynb
 teleportation.ipynb
 vqe-molecules.ipynb
+_data
+.idea
