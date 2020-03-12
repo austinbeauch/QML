@@ -3,7 +3,6 @@ MODIFIED CODE FROM
 https://github.com/XanaduAI/qml/blob/master/demonstrations/tutorial_quantum_transfer_learning.py
 """
 
-
 # Plotting
 import matplotlib.pyplot as plt
 
@@ -17,31 +16,31 @@ from torchvision import datasets, models, transforms
 
 # Pennylane
 import pennylane as qml
-# from pennylane import numpy as np
-import numpy as np
+from pennylane import numpy as np
+# import numpy as np
 # Other tools
 import time
 import os
 import copy
+from tqdm import tqdm
 
 # OpenMP: number of parallel threads.
 os.environ["OMP_NUM_THREADS"] = "1"
 
-n_qubits = 4                # Number of qubits
-step = 0.0004               # Learning rate
-batch_size = 4              # Number of samples for each training step
-num_epochs = 1              # Number of training epochs
-q_depth = 6                 # Depth of the quantum circuit (number of variational layers)
-gamma_lr_scheduler = 0.1    # Learning rate reduction applied every 10 epochs.
-q_delta = 0.01              # Initial spread of random quantum weights
-rng_seed = 0                # Seed for random number generator
-start_time = time.time()    # Start of the computation timer
+n_qubits = 4  # Number of qubits
+step = 0.0004  # Learning rate
+batch_size = 4  # Number of samples for each training step
+num_epochs = 1  # Number of training epochs
+q_depth = 6  # Depth of the quantum circuit (number of variational layers)
+gamma_lr_scheduler = 0.1  # Learning rate reduction applied every 10 epochs.
+q_delta = 0.01  # Initial spread of random quantum weights
+rng_seed = 0  # Seed for random number generator
+start_time = time.time()  # Start of the computation timer
 
 # We initialize a PennyLane device with a ``default.qubit`` backend.
 dev = qml.device("default.qubit", wires=n_qubits)
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-
 
 data_transforms = {
     "train": transforms.Compose(
@@ -136,7 +135,6 @@ def entangling_layer(nqubits):
 
 @qml.qnode(dev, interface="torch")
 def q_net(q_in, q_weights_flat):
-
     # Reshape weights
     q_weights = q_weights_flat.reshape(q_depth, n_qubits)
 
@@ -172,7 +170,6 @@ class Quantumnet(nn.Module):
         q_out = q_out.to(device)
         for elem in q_in:
             q_out_elem = q_net(elem, self.q_params).float().unsqueeze(0)
-            print(q_net.draw())
             q_out = torch.cat((q_out, q_out_elem))
         return self.post_net(q_out)
 
@@ -181,7 +178,6 @@ model_hybrid = torchvision.models.resnet18(pretrained=True)
 
 for param in model_hybrid.parameters():
     param.requires_grad = False
-
 
 # Notice that model_hybrid.fc is the last layer of ResNet18
 model_hybrid.fc = Quantumnet()
@@ -217,9 +213,14 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs):
             # Iterate over data.
             n_batches = dataset_sizes[phase] // batch_size
             it = 0
+
+            # prefix = "Training Epoch {:3d}: ".format(epoch)
+            # for data in tqdm(dataloaders[phase], desc=prefix):
+            #     inputs, labels = data
             for inputs, labels in dataloaders[phase]:
                 since_batch = time.time()
                 batch_size_ = len(inputs)
+
                 inputs = inputs.to(device)
                 labels = labels.to(device)
                 optimizer.zero_grad()
@@ -302,10 +303,11 @@ def visualize_model(model, num_images=6, fig_name="Predictions"):
                 images_so_far += 1
                 ax = plt.subplot(num_images // 2, 2, images_so_far)
                 ax.axis("off")
-                ax.set_title("[{}]".format(class_names[preds[j]]),  color="g" if preds[j] == labels[j] else "r")
+                ax.set_title("[{}]".format(class_names[preds[j]]), color="g" if preds[j] == labels[j] else "r")
                 imshow(inputs.cpu().data[j])
                 if images_so_far == num_images:
                     return
+
 
 visualize_model(model_hybrid, num_images=batch_size)
 plt.show()
