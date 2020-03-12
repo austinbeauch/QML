@@ -1,3 +1,8 @@
+"""
+MODIFIED CODE FROM
+https://github.com/XanaduAI/qml/blob/master/demonstrations/tutorial_quantum_transfer_learning.py
+"""
+
 
 # Plotting
 import matplotlib.pyplot as plt
