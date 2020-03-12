@@ -139,3 +139,5 @@ teleportation.ipynb
 vqe-molecules.ipynb
 _data
 .idea
+
+qml/logs
