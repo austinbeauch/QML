@@ -1,11 +1,5 @@
 import torch
-import pennylane as qml
-from pennylane import numpy as np
 import torch.nn as nn
-from config import get_config
-
-from q_module import QuantumCircuit
-
 
 class ClassicModel(nn.Module):
     def __init__(self, config, inpt_shp):
@@ -35,17 +29,3 @@ class ClassicModel(nn.Module):
         output = self.output(input_features)
 
         return output
-
-
-class QuantumNet(nn.Module):
-    def __init__(self, config):
-        super().__init__()
-        self.pre_net = nn.Linear(512, config.n_qubits)
-        self.q_net = QuantumCircuit(config.n_qubits, config.q_depth, config.q_delta)
-        self.post_net = nn.Linear(config.n_qubits, 2)
-
-    def forward(self, input_features):
-        pre_out = self.pre_net(input_features)
-        q_in = torch.tanh(pre_out) * np.pi / 2.0
-        q_out = self.q_net(q_in)
-        return self.post_net(q_out)

@@ -8,10 +8,11 @@ from torch.utils.data import DataLoader
 from torch.optim import lr_scheduler
 from torchvision import datasets, models, transforms
 from tqdm import tqdm, trange
+from tensorboardX import SummaryWriter
 
 from config import get_config, print_usage, print_config
-from tensorboardX import SummaryWriter
-from quantum_model import QuantumNet
+from quantum_network import QuantumNet
+from classic_model import ClassicModel
 
 
 def data_criterion(config):
@@ -91,7 +92,7 @@ def train_model(config):
 
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     model = get_model(config).to(device)
-    
+
     criterion = data_criterion(config)
     # optimizer = optim.SGD(model.fc.parameters(), lr=config.learning_rate, momentum=0.9)
     optimizer = optim.Adam(model.fc.parameters(), lr=config.learning_rate)
