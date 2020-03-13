@@ -41,7 +41,8 @@ def get_model(config):
 
     if config.model == "classic":
         num_ftrs = model_conv.fc.in_features
-        model_conv.fc = nn.Linear(num_ftrs, 2)
+        # model_conv.fc = nn.Linear(num_ftrs, 2)
+        model_conv.fc = ClassicModel(config, num_ftrs)
 
     elif config.model == "quantum":
         model_conv.fc = QuantumNet(config)
