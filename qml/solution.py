@@ -33,7 +33,7 @@ def model_criterion(config):
     return model_loss
 
 
-def get_model(config, device):
+def get_model(config):
     model_conv = models.resnet18(pretrained=True)
     for param in model_conv.parameters():
         param.requires_grad = False
@@ -43,7 +43,9 @@ def get_model(config, device):
         model_conv.fc = nn.Linear(num_ftrs, 2)
 
     elif config.model == "quantum":
-        model_conv.fc = QuantumNet(config, device)
+        model_conv.fc = QuantumNet(config)
+
+    print(model_conv)
 
     return model_conv
 
@@ -88,7 +90,8 @@ def train_model(config):
     dataset_sizes = {x: len(image_datasets[x]) for x in ['train', 'val']}
 
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    model = get_model(config, device).to(device)
+    model = get_model(config).to(device)
+    
     criterion = data_criterion(config)
     # optimizer = optim.SGD(model.fc.parameters(), lr=config.learning_rate, momentum=0.9)
     optimizer = optim.Adam(model.fc.parameters(), lr=config.learning_rate)

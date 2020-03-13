@@ -89,6 +89,10 @@ model_arg.add_argument("--loss_type", type=str,
                        default="CrossEntropyLoss",
                        help="Type of data loss to be used")
 
+model_arg.add_argument("--activation", type=str,
+                       default="ReLU",
+                       help="Activation type")
+
 model_arg.add_argument("--normalize", type=str2bool,
                        default=True,
                        help="Whether to normalize with mean/std or not")
@@ -97,19 +101,19 @@ model_arg.add_argument("--l2_reg", type=float,
                        default=1e-4,
                        help="L2 Regularization strength")
 
-model_arg.add_argument("--n_qubits", type=str,
+model_arg.add_argument("--n_qubits", type=int,
                        default=4,
                        help="Number of qubits in quantum circuit")
 
-model_arg.add_argument("--q_depth", type=str,
+model_arg.add_argument("--q_depth", type=int,
                        default=6,
                        help="Depth of the quantum circuit (number of variational layers)")
 
-model_arg.add_argument("--q_delta", type=str,
+model_arg.add_argument("--q_delta", type=int,
                        default=0.01,
                        help="Initial spread of random quantum weights")
 
-model_arg.add_argument("--crop_size", type=str,
+model_arg.add_argument("--crop_size", type=int,
                        default=224,
                        help="Final image cropping to (size, size)")
 
