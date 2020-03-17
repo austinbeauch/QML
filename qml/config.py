@@ -42,6 +42,11 @@ main_arg.add_argument("--mode", type=str,
                       choices=["train", "test"],
                       help="Run mode")
 
+main_arg.add_argument("--model", type=str,
+                      default="classic",
+                      choices=["classic", "quantum"],
+                      help="Choose a classical model or a quantum model.")
+
 # ----------------------------------------
 # Arguments for training
 train_arg = add_argument_group("Training")
@@ -59,7 +64,7 @@ train_arg.add_argument("--batch_size", type=int,
                        help="Size of each training batch")
 
 train_arg.add_argument("--num_epoch", type=int,
-                       default=25,
+                       default=5,
                        help="Number of epochs to train")
 
 train_arg.add_argument("--val_intv", type=int,
@@ -85,27 +90,11 @@ train_arg.add_argument("--resume", type=str2bool,
 # Arguments for model
 model_arg = add_argument_group("Model")
 
-model_arg.add_argument("--loss_type", type=str,
-                       default="CrossEntropyLoss",
-                       help="Type of data loss to be used")
-
-model_arg.add_argument("--activation", type=str,
-                       default="ReLU",
-                       help="Activation type")
-
-model_arg.add_argument("--normalize", type=str2bool,
-                       default=True,
-                       help="Whether to normalize with mean/std or not")
-
-model_arg.add_argument("--l2_reg", type=float,
-                       default=1e-4,
-                       help="L2 Regularization strength")
-
 model_arg.add_argument("--n_qubits", type=int,
                        default=4,
                        help="Number of qubits in quantum circuit")
 
-model_arg.add_argument("--q_depth", type=int,
+model_arg.add_argument("--depth", type=int,
                        default=6,
                        help="Depth of the quantum circuit (number of variational layers)")
 
@@ -113,14 +102,9 @@ model_arg.add_argument("--q_delta", type=int,
                        default=0.01,
                        help="Initial spread of random quantum weights")
 
-model_arg.add_argument("--crop_size", type=int,
-                       default=224,
-                       help="Final image cropping to (size, size)")
-
-model_arg.add_argument("--model", type=str,
-                       default="classic",
-                       choices=["classic", "quantum"],
-                       help="Choose a classical model or a quantum model.")
+model_arg.add_argument("--visualize", type=bool,
+                       default=False,
+                       help="Visualize predictions during testing")
 
 
 def get_config():

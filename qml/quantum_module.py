@@ -4,6 +4,7 @@ import pennylane as qml
 from pennylane import numpy as np
 
 
+# TODO: Find out the QuantumCircuit bottleneck, where is the simulation slow
 class QuantumCircuit(nn.Module):
     """
     Custom variational quantum circuit Torch module.

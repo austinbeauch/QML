@@ -1,3 +1,10 @@
+"""
+Quantum transfer learning framework main script. This work is based off the Xanadu AI tutorial from the link below.
+
+https://pennylane.ai/qml/demos/tutorial_quantum_transfer_learning.html
+"""
+
+
 import os
 import copy
 
@@ -9,6 +16,7 @@ from torch.optim import lr_scheduler
 from torchvision import datasets, models, transforms
 from tqdm import tqdm, trange
 from tensorboardX import SummaryWriter
+from matplotlib import pyplot as plt
 
 from config import get_config, print_usage, print_config
 from quantum_network import QuantumNet
@@ -17,21 +25,7 @@ from classic_model import ClassicModel
 
 def data_criterion(config):
     """Returns the loss object based on the commandline argument for the data term"""
-    return getattr(nn, config.loss_type)()
-
-
-def model_criterion(config):
-    """Loss function based on the commandline argument for the regularizer term"""
-
-    def model_loss(model):
-        loss = 0
-        for name, param in model.named_parameters():
-            if "weight" in name:
-                loss += torch.sum(param ** 2)
-
-        return loss * config.l2_reg
-
-    return model_loss
+    return nn.CrossEntropyLoss()
 
 
 def get_model(config):
@@ -109,7 +103,7 @@ def train_model(config):
             if phase == 'train':
                 model.train()  # Set model to training mode
             else:
-                model.eval()   # Set model to evaluate mode
+                model.eval()  # Set model to evaluate mode
 
             running_loss = 0.0
             running_corrects = 0
@@ -173,14 +167,14 @@ def train_model(config):
     return model
 
 
-def test(model, config):
+def test(config):
     """Test routine"""
 
     data_transforms = {
         "test": transforms.Compose(
             [
                 transforms.Resize(256),
-                transforms.CenterCrop(config.crop_size),
+                transforms.CenterCrop(224),
                 transforms.ToTensor(),
                 transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
             ]
@@ -197,12 +191,12 @@ def test(model, config):
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
     # Create model
-    # model = get_model(config)
-    # if torch.cuda.is_available():
-    #     model = model.cuda()
-    # load_res = torch.load(os.path.join(config.save_dir, "best_model.pth"))
-    # model.load_state_dict(load_res["model"])
-    # model.eval()
+    model = get_model(config)
+    if torch.cuda.is_available():
+        model = model.cuda()
+    load_res = torch.load(os.path.join(config.save_dir, "best_model.pth"))
+    model.load_state_dict(load_res["model"])
+    model.eval()
 
     criterion = data_criterion(config)
     prefix = "Testing: "
@@ -227,17 +221,58 @@ def test(model, config):
     print("Test Loss = {}".format(test_loss))
     print("Test Accuracy = {}%".format(test_acc))
 
+    if config.visualize:
+        visualize_model(model, dataloaders, device)
+
+
+def visualize_model(model, dataloaders, device, num_images=6, fig_name="Predictions"):
+    images_so_far = 0
+    _fig = plt.figure(fig_name)
+    model.eval()
+    class_names = {0: "Ants", 1: "Bees"}
+    with torch.no_grad():
+        for _i, (inputs, labels) in enumerate(dataloaders["test"]):
+            inputs = inputs.to(device)
+            labels = labels.to(device)
+            outputs = model(inputs)
+            _, preds = torch.max(outputs, 1)
+            for j in range(inputs.size()[0]):
+                images_so_far += 1
+                ax = plt.subplot(num_images // 2, 2, images_so_far)
+                ax.axis("off")
+
+                ax.set_title("Pred: {}, True: {}".format(class_names[preds[j].item()], class_names[labels[j].item()],
+                                                         c="g" if preds[j].item() == labels[j].item() else "r"))
+
+                imshow(inputs.cpu().data[j])
+                if images_so_far == num_images:
+                    plt.show()
+                    return
+
+
+def imshow(inp, title=None):
+    """Display image from tensor."""
+    inp = inp.numpy().transpose((1, 2, 0))
+    # Inverse of the initial normalization operation.
+    mean = np.array([0.485, 0.456, 0.406])
+    std = np.array([0.229, 0.224, 0.225])
+    inp = std * inp + mean
+    inp = np.clip(inp, 0, 1)
+    plt.imshow(inp)
+    if title is not None:
+        plt.title(title)
+
 
 def main(config):
     """The main function."""
-    model = train_model(config)
-    test(model, config)
-    # if config.mode == "train":
-    #     train_model(config)
-    # elif config.mode == "test":
-    #     test(config)
-    # else:
-    #     raise ValueError("Unknown run mode \"{}\"".format(config.mode))
+    # model = train_model(config)
+    # test(model, config)
+    if config.mode == "train":
+        train_model(config)
+    elif config.mode == "test":
+        test(config)
+    else:
+        raise ValueError("Unknown run mode \"{}\"".format(config.mode))
 
 
 if __name__ == "__main__":

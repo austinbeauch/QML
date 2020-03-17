@@ -1,0 +1,8 @@
+tensorboardX
+matplotlib
+torchvision
+torch
+tqdm
+pennylane
+numpy
+

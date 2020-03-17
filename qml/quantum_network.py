@@ -11,7 +11,7 @@ class QuantumNet(nn.Module):
     def __init__(self, config):
         super().__init__()
         self.pre_net = nn.Linear(512, config.n_qubits)
-        self.q_net = QuantumCircuit(config.n_qubits, config.q_depth, config.q_delta)
+        self.q_net = QuantumCircuit(config.n_qubits, config.depth, config.q_delta)
         self.post_net = nn.Linear(config.n_qubits, 2)
 
     def forward(self, input_features):
