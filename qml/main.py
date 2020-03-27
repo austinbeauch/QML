@@ -234,9 +234,11 @@ def test(config):
     trainmodel_file = os.path.join(config.save_dir, f"{config.dev}_{config.circuit}_train.pth")
 
     try:
+        print(f"Trying to load {bestmodel_file}...")
         load_res = torch.load(bestmodel_file)
+        print("Loaded.")
     except FileNotFoundError:
-        print("Using most recent trained model")
+        print(f"File not found, using {trainmodel_file} instead.")
         load_res = torch.load(trainmodel_file)
     model.load_state_dict(load_res["model"])
     model.eval()

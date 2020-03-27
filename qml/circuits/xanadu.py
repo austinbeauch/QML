@@ -10,7 +10,9 @@ from .layers import *
 class XanaduCircuit(QuantumCircuit):
     def __init__(self, qubits, depth, delta, dev):
         super().__init__(qubits, depth, delta, dev)
-        self.q_params = nn.Parameter(delta * torch.randn(depth * qubits))
+        params = qubits
+        self.params_per_layer = torch.Tensor([params]).type(torch.int32)
+        self.q_params = nn.Parameter(delta * torch.randn(params * depth))
 
     @staticmethod
     def layer(n_qubits, w):
