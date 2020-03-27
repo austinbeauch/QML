@@ -4,12 +4,12 @@ Quantum transfer learning framework main script. This work is based off the Xana
 https://pennylane.ai/qml/demos/tutorial_quantum_transfer_learning.html
 """
 
-
 import os
 import copy
 
-import numpy as np
 import torch
+import numpy as np
+import pennylane as qml
 from torch import nn, optim
 from torch.utils.data import DataLoader
 from torch.optim import lr_scheduler
@@ -18,14 +18,14 @@ from tqdm import tqdm, trange
 from tensorboardX import SummaryWriter
 from matplotlib import pyplot as plt
 
+from qiskit import IBMQ
+from qiskit.providers.ibmq import least_busy
+
+
+import circuits
 from config import get_config, print_usage, print_config
 from quantum_network import QuantumNet
 from classic_model import ClassicModel
-
-
-def data_criterion(config):
-    """Returns the loss object based on the commandline argument for the data term"""
-    return nn.CrossEntropyLoss()
 
 
 def get_model(config):
@@ -39,9 +39,32 @@ def get_model(config):
         model_conv.fc = ClassicModel(config, num_ftrs)
 
     elif config.model == "quantum":
-        model_conv.fc = QuantumNet(config)
 
-    print(model_conv)
+        if config.backend is not None:
+            IBMQ.load_account()
+            dev = qml.device('qiskit.ibmq', wires=config.n_qubits, backend=config.backend)
+
+        elif config.dev == "real":
+            IBMQ.load_account()
+            provider = IBMQ.get_provider(hub='ibm-q')
+            backend = least_busy(provider.backends(filters=lambda x: x.configuration().n_qubits >= config.n_qubits
+                                                                     and not x.configuration().simulator
+                                                                     and x.status().operational))
+            dev = qml.device('qiskit.ibmq', wires=config.n_qubits, backend=backend.name())
+
+        elif config.dev == "forest.qvm":
+            dev = qml.device(config.dev, device=f"{config.n_qubits}q-qvm")
+
+        elif config.dev == "forest.pyqvm":
+            dev = qml.device(config.dev, device=f"{config.n_qubits}q-pyqvm")
+
+        else:
+            dev = qml.device(config.dev, wires=config.n_qubits)
+
+        print("Running on", dev.name)
+        model_conv.fc = QuantumNet(config, dev)
+
+    print(model_conv.fc)
 
     return model_conv
 
@@ -58,7 +81,9 @@ def train_model(config):
         os.makedirs(config.log_dir)
     if not os.path.exists(config.save_dir):
         os.makedirs(config.save_dir)
-    bestmodel_file = os.path.join(config.save_dir, "best_model.pth")
+
+    bestmodel_file = os.path.join(config.save_dir, f"{config.dev}_{config.circuit}_best.pth")
+    trainmodel_file = os.path.join(config.save_dir, f"{config.dev}_{config.circuit}_train.pth")
 
     data_transforms = {
         'train': transforms.Compose([
@@ -85,17 +110,19 @@ def train_model(config):
 
     dataset_sizes = {x: len(image_datasets[x]) for x in ['train', 'val']}
 
+    print(f"{dataset_sizes['train']} training photos")
+
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     model = get_model(config).to(device)
 
-    criterion = data_criterion(config)
+    cost = nn.CrossEntropyLoss()
+
     # optimizer = optim.SGD(model.fc.parameters(), lr=config.learning_rate, momentum=0.9)
     optimizer = optim.Adam(model.fc.parameters(), lr=config.learning_rate)
-    scheduler = lr_scheduler.StepLR(optimizer, step_size=7, gamma=0.1)
+    scheduler = lr_scheduler.StepLR(optimizer, step_size=7)
 
     best_model_wts = copy.deepcopy(model.state_dict())
     best_acc = 0.0
-
     for epoch in range(config.num_epoch):
 
         # Each epoch has a training and validation phase
@@ -124,7 +151,7 @@ def train_model(config):
                 with torch.set_grad_enabled(phase == 'train'):
                     outputs = model(inputs)
                     _, preds = torch.max(outputs, 1)
-                    loss = criterion(outputs, labels)
+                    loss = cost(outputs, labels)
 
                     # backward + optimize only if in training phase
                     if phase == 'train':
@@ -154,6 +181,14 @@ def train_model(config):
                     "iter_idx": iter_idx,
                     "best_va_acc": best_acc
                 }, bestmodel_file)
+
+            if phase == "train":
+                torch.save({
+                    "model": model.state_dict(),
+                    "optimizer": optimizer.state_dict(),
+                    "iter_idx": iter_idx,
+                    "best_va_acc": best_acc
+                }, trainmodel_file)
 
         print()
 
@@ -194,11 +229,19 @@ def test(config):
     model = get_model(config)
     if torch.cuda.is_available():
         model = model.cuda()
-    load_res = torch.load(os.path.join(config.save_dir, "best_model.pth"))
+
+    bestmodel_file = os.path.join(config.save_dir, f"{config.dev}_{config.circuit}_best.pth")
+    trainmodel_file = os.path.join(config.save_dir, f"{config.dev}_{config.circuit}_train.pth")
+
+    try:
+        load_res = torch.load(bestmodel_file)
+    except FileNotFoundError:
+        print("Using most recent trained model")
+        load_res = torch.load(trainmodel_file)
     model.load_state_dict(load_res["model"])
     model.eval()
 
-    criterion = data_criterion(config)
+    cost = nn.CrossEntropyLoss()
     prefix = "Testing: "
     running_loss = 0.0
     running_corrects = 0
@@ -210,7 +253,7 @@ def test(config):
         with torch.no_grad():
             outputs = model(inputs)
             _, preds = torch.max(outputs, 1)
-            loss = criterion(outputs, labels)
+            loss = cost(outputs, labels)
 
             running_loss += loss.item() * inputs.size(0)
             running_corrects += torch.sum(preds == labels.data)

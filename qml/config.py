@@ -43,9 +43,17 @@ main_arg.add_argument("--mode", type=str,
                       help="Run mode")
 
 main_arg.add_argument("--model", type=str,
-                      default="classic",
+                      default="quantum",
                       choices=["classic", "quantum"],
                       help="Choose a classical model or a quantum model.")
+
+main_arg.add_argument("--dev", type=str,
+                      default="default.qubit",
+                      help="QPU device (physical or simulator)")
+
+main_arg.add_argument("--backend", type=str,
+                      default=None,
+                      help="Physical backend")
 
 # ----------------------------------------
 # Arguments for training
@@ -89,6 +97,10 @@ train_arg.add_argument("--resume", type=str2bool,
 # ----------------------------------------
 # Arguments for model
 model_arg = add_argument_group("Model")
+
+model_arg.add_argument("--circuit", type=str,
+                       default="XanaduCircuit",
+                       help="Quantum circuit used in model")
 
 model_arg.add_argument("--n_qubits", type=int,
                        default=4,

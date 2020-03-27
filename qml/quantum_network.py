@@ -1,17 +1,22 @@
+import importlib
+
 import torch
 import torch.nn as nn
 import pennylane as qml
 from pennylane import numpy as np
 
 from config import get_config
-from quantum_module import QuantumCircuit
+import circuits
 
 
 class QuantumNet(nn.Module):
-    def __init__(self, config):
+    def __init__(self, config, dev):
         super().__init__()
         self.pre_net = nn.Linear(512, config.n_qubits)
-        self.q_net = QuantumCircuit(config.n_qubits, config.depth, config.q_delta)
+
+        module = getattr(importlib.import_module(f"circuits"), f"{config.circuit}")
+        self.q_net = module(config.n_qubits, config.depth, config.q_delta, dev)
+
         self.post_net = nn.Linear(config.n_qubits, 2)
 
     def forward(self, input_features):
