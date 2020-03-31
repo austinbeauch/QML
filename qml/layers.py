@@ -1,28 +1,28 @@
 import pennylane as qml
 
 
-def H_layer(nqubits):
+def h_layer(nqubits):
     """Layer of single-qubit Hadamard gates.
     """
     for idx in range(nqubits):
         qml.Hadamard(wires=idx)
 
 
-def RY_layer(rotations):
+def ry_layer(rotations):
     """Layer of parametrized qubit rotations around the y axis.
     """
     for idx, rot in enumerate(rotations):
         qml.RY(rot, wires=idx)
 
 
-def RX_layer(rotations):
+def rx_layer(rotations):
     """Layer of parametrized qubit rotations around the y axis.
     """
     for idx, rot in enumerate(rotations):
         qml.RX(rot, wires=idx)
 
 
-def RZ_layer(rotations):
+def rz_layer(rotations):
     """Layer of parametrized qubit rotations around the y axis.
     """
     for idx, rot in enumerate(rotations):

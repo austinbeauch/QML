@@ -42,8 +42,8 @@ class QuantumCircuit(nn.Module):
             q_weights = q_weights_flat.reshape(q_depth, params_per_layer)
 
             # embedding layers for each circuit
-            H_layer(n_qubits)
-            RY_layer(q_in)
+            h_layer(n_qubits)
+            ry_layer(q_in)
 
             # calling the variational layers
             for k in range(q_depth):
