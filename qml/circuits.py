@@ -144,7 +144,7 @@ class Circuit11(QuantumCircuit):
     def __init__(self, qubits, depth, delta, dev):
         super().__init__(qubits, depth, delta, dev)
         assert qubits % 2 == 0  # unsure if qubits needs to be even to scale properly
-        params = 2 * qubits + 2 * qubits//2
+        params = 2 * qubits + 2 * qubits // 2
         self.params_per_layer = torch.Tensor([params]).type(torch.int32)
         self.q_params = nn.Parameter(delta * torch.randn(self.params_per_layer * depth))
 
@@ -160,6 +160,29 @@ class Circuit11(QuantumCircuit):
             qml.RZ(w[2 * n_qubits + n_qubits // 2 + i - 1], wires=i)
         for i in range(1, n_qubits - 1, 2):
             qml.CNOT(wires=[i, i + 1])
+
+
+class Circuit13(QuantumCircuit):
+    def __init__(self, qubits, depth, delta, dev):
+        super().__init__(qubits, depth, delta, dev)
+        params = 2 * qubits + 2 * qubits
+        self.params_per_layer = torch.Tensor([params]).type(torch.int32)
+        self.q_params = nn.Parameter(delta * torch.randn(self.params_per_layer * depth))
+
+    @staticmethod
+    def layer(n_qubits, w):
+        ry_layer(w[:n_qubits])
+        wire_list = list(range(n_qubits))
+        for i in range(n_qubits):
+            qml.CRZ(w[n_qubits+i], wires=[i, wire_list[i-1]])
+
+        ry_layer(w[2*n_qubits:3*n_qubits])
+
+        # this doesn't generate it exactly as outlined in the paper
+        iterations = list(range(n_qubits - 1, -1, -1))
+        iterations.append(iterations.pop(0))
+        for i in iterations:
+            qml.CRZ(w[3*n_qubits+i], wires=[wire_list[i-1], i])
 
 
 class Circuit19(QuantumCircuit):

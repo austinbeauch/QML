@@ -1,7 +1,7 @@
 import torch
 from torch import nn
 
-from qml.layers import *
+from layers import *
 
 
 class QuantumCircuit(nn.Module):
