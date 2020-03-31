@@ -14,7 +14,7 @@ class QuantumNet(nn.Module):
         super().__init__()
         self.pre_net = nn.Linear(512, config.n_qubits)
 
-        module = getattr(importlib.import_module(f"circuits"), f"{config.circuit}")
+        module = getattr(circuits, f"{config.circuit}")
         self.q_net = module(config.n_qubits, config.depth, config.q_delta, dev)
 
         self.post_net = nn.Linear(config.n_qubits, 2)

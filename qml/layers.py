@@ -8,23 +8,26 @@ def H_layer(nqubits):
         qml.Hadamard(wires=idx)
 
 
-def RY_layer(w):
+def RY_layer(rotations):
     """Layer of parametrized qubit rotations around the y axis.
     """
-    for idx, element in enumerate(w):
-        qml.RY(element, wires=idx)
+    for idx, rot in enumerate(rotations):
+        qml.RY(rot, wires=idx)
 
-def RX_layer(w):
-    """Layer of parametrized qubit rotations around the y axis.
-    """
-    for idx, element in enumerate(w):
-        qml.RX(element, wires=idx)
 
-def RZ_layer(w):
+def RX_layer(rotations):
     """Layer of parametrized qubit rotations around the y axis.
     """
-    for idx, element in enumerate(w):
-        qml.RZ(element, wires=idx)
+    for idx, rot in enumerate(rotations):
+        qml.RX(rot, wires=idx)
+
+
+def RZ_layer(rotations):
+    """Layer of parametrized qubit rotations around the y axis.
+    """
+    for idx, rot in enumerate(rotations):
+        qml.RZ(rot, wires=idx)
+
 
 def entangling_layer(nqubits):
     """Layer of CNOTs followed by another shifted layer of CNOT.

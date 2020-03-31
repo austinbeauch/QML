@@ -22,7 +22,7 @@ from qiskit import IBMQ
 from qiskit.providers.ibmq import least_busy
 
 
-import circuits
+from circuits import *
 from config import get_config, print_usage, print_config
 from quantum_network import QuantumNet
 from classic_model import ClassicModel

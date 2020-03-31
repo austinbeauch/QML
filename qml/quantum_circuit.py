@@ -1,8 +1,7 @@
 import torch
 from torch import nn
-import pennylane as qml
 
-from .layers import *
+from qml.layers import *
 
 
 class QuantumCircuit(nn.Module):
