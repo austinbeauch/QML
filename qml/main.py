@@ -146,7 +146,7 @@ def train_model(config):
         for phase in ['train', 'val']:
             if phase == 'train':
                 model.train()  # Set model to training mode
-            elif epoch % config.val_intv != 0:
+            elif epoch % config.val_intv != 0 and epoch-config.epochs != 1:  # validate if it's the last epoch
                 continue
             else:
                 model.eval()  # Set model to evaluate mode
@@ -352,10 +352,10 @@ if __name__ == "__main__":
         print_usage()
         exit(1)
     print_config(config)
-
-    try:
-        shutil.rmtree(config.log_dir)
-        time.sleep(5)
-    except FileNotFoundError:
-        pass
+    if not config.resume:
+        try:
+            shutil.rmtree(config.log_dir)
+            time.sleep(5)  # sleep to tensorboard doesn't cache old logs
+        except FileNotFoundError:
+            pass
     main(config)

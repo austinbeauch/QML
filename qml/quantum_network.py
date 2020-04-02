@@ -1,4 +1,9 @@
-import importlib
+"""
+Quantum network class.
+This work is based off the Xanadu AI tutorial from the link below.
+
+https://pennylane.ai/qml/demos/tutorial_quantum_transfer_learning.html
+"""
 
 import torch
 import torch.nn as nn
@@ -13,11 +18,15 @@ class QuantumNet(nn.Module):
     def __init__(self, config, dev):
         super().__init__()
         self.pre_net = nn.Linear(512, config.qubits)
+        # for param in self.pre_net.parameters():
+        #     param.requires_grad = False
 
         module = getattr(circuits, f"{config.circuit}")
         self.q_net = module(config.qubits, config.depth, config.q_delta, dev)
 
         self.post_net = nn.Linear(config.qubits, 2)
+        # for param in self.post_net.parameters():
+        #     param.requires_grad = False
 
     def forward(self, input_features):
         pre_out = self.pre_net(input_features)

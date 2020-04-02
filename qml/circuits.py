@@ -1,5 +1,6 @@
 """
-Circuits from https://arxiv.org/pdf/1905.10876.pdf
+Circuits from https://arxiv.org/pdf/1905.10876.pdf and
+https://pennylane.ai/qml/demos/tutorial_quantum_transfer_learning.html
 """
 
 import torch

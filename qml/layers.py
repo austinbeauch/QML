@@ -1,3 +1,11 @@
+"""
+Quantum transfer learning circuit layers script.
+This work is based off the Xanadu AI tutorial from the link below.
+
+https://pennylane.ai/qml/demos/tutorial_quantum_transfer_learning.html
+"""
+
+
 import pennylane as qml
 
 

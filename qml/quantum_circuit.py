@@ -1,3 +1,10 @@
+"""
+Quantum circuit main class.
+This work is based off the Xanadu AI tutorial from the link below.
+
+https://pennylane.ai/qml/demos/tutorial_quantum_transfer_learning.html
+"""
+
 import torch
 from torch import nn
 
