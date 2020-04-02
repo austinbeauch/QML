@@ -29,7 +29,7 @@ hyperparamteres:
 Example training usage might be:
 
 ```shell script
-~/QML/qml$ python main.py --model quantum --num_epoch 5 --depth 5 --n_qubits 4 --mode train
+~/QML/qml$ python main.py --model quantum --num_epoch 5 --depth 5 --qubits 4 --mode train
 ```
 
 (note that n_qubits refers to the number of nodes in each layer of a classical analogue. Interesting for comparing
@@ -64,7 +64,7 @@ Calling a custom circuit class can be done with the `--circuit` command line arg
 match the class name from `circuits.py` (**case sensitive**). For example:
 
 ```shell script
-~/QML/qml$ python main.py --num_epoch 10 --depth 2 --n_qubits 4 --circuit Circuit2
+~/QML/qml$ python main.py --num_epoch 10 --depth 2 --qubits 4 --circuit Circuit2
 ```
 
 ### References 
