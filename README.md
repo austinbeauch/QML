@@ -67,6 +67,15 @@ match the class name from `circuits.py` (**case sensitive**). For example:
 ~/QML/qml$ python main.py --num_epoch 10 --depth 2 --qubits 4 --circuit Circuit2
 ```
 
+## Using IBMQ
+A simple command line argument has been included to run any training (not recommended) or testing (more recommended)
+on real quantum hardware. Simple include the `--backend` flag with a proper ibmq backend name such as:
+
+```shell script
+~/QML/qml$ python main.py --num_epoch 10 --depth 2 --qubits 4 --backend ibmq_london
+```
+This might require prior account credentials loading on your machine.
+
 ### References 
 
 [1] A. Mari, T. R. Bromley, J. Izaac, M. Schuld, and N. Killo-ran, “Transfer learning in hybrid classical-quantum neu-ral networks,”arXiv:1912.08278 [quant-ph, stat], Dec.2019.
