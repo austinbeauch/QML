@@ -18,8 +18,8 @@ class XanaduCircuit(QuantumCircuit):
         self.q_params = nn.Parameter(delta * torch.randn(params * depth))
 
     @staticmethod
-    def layer(n_qubits, w):
-        entangling_layer(n_qubits)
+    def layer(qubits, w):
+        entangling_layer(qubits)
         ry_layer(w)
 
 
@@ -31,9 +31,9 @@ class Circuit1(QuantumCircuit):
         self.q_params = nn.Parameter(delta * torch.randn(self.params_per_layer * depth))
 
     @staticmethod
-    def layer(n_qubits, w):
-        rx_layer(w[:n_qubits])
-        rz_layer(w[n_qubits:])
+    def layer(qubits, w):
+        rx_layer(w[:qubits])
+        rz_layer(w[qubits:])
 
 
 class Circuit2(QuantumCircuit):
@@ -44,10 +44,10 @@ class Circuit2(QuantumCircuit):
         self.q_params = nn.Parameter(delta * torch.randn(self.params_per_layer * depth))
 
     @staticmethod
-    def layer(n_qubits, w):
-        rx_layer(w[:n_qubits])
-        rz_layer(w[n_qubits:])
-        for i in range(n_qubits):
+    def layer(qubits, w):
+        rx_layer(w[:qubits])
+        rz_layer(w[qubits:])
+        for i in range(qubits):
             qml.CNOT(wires=[i, i + 1])
 
 
@@ -59,11 +59,11 @@ class Circuit3(QuantumCircuit):
         self.q_params = nn.Parameter(delta * torch.randn(self.params_per_layer * depth))
 
     @staticmethod
-    def layer(n_qubits, w):
-        rx_layer(w[:n_qubits])
-        rz_layer(w[n_qubits:-n_qubits + 1])
-        for i in range(n_qubits - 1):
-            qml.CRZ(w[2 * n_qubits + i], wires=[i, i + 1])
+    def layer(qubits, w):
+        rx_layer(w[:qubits])
+        rz_layer(w[qubits:-qubits + 1])
+        for i in range(qubits - 1):
+            qml.CRZ(w[2 * qubits + i], wires=[i, i + 1])
 
 
 class Circuit4(QuantumCircuit):
@@ -74,11 +74,11 @@ class Circuit4(QuantumCircuit):
         self.q_params = nn.Parameter(delta * torch.randn(self.params_per_layer * depth))
 
     @staticmethod
-    def layer(n_qubits, w):
-        rx_layer(w[:n_qubits])
-        rz_layer(w[n_qubits:-n_qubits + 1])
-        for i in range(n_qubits - 1):
-            qml.CRX(w[2 * n_qubits + i], wires=[i, i + 1])
+    def layer(qubits, w):
+        rx_layer(w[:qubits])
+        rz_layer(w[qubits:-qubits + 1])
+        for i in range(qubits - 1):
+            qml.CRX(w[2 * qubits + i], wires=[i, i + 1])
 
 
 class Circuit5(QuantumCircuit):
@@ -89,18 +89,18 @@ class Circuit5(QuantumCircuit):
         self.q_params = nn.Parameter(delta * torch.randn(self.params_per_layer * depth))
 
     @staticmethod
-    def layer(n_qubits, w):
-        rx_layer(w[:n_qubits])
-        rz_layer(w[n_qubits:2 * n_qubits])
+    def layer(qubits, w):
+        rx_layer(w[:qubits])
+        rz_layer(w[qubits:2 * qubits])
 
-        for i in range(n_qubits):
-            for j in range(n_qubits):
+        for i in range(qubits):
+            for j in range(qubits):
                 if i == j:
                     continue
-                qml.CRZ(2 * n_qubits + i * (n_qubits - 1) + j, wires=[i, j])
+                qml.CRZ(2 * qubits + i * (qubits - 1) + j, wires=[i, j])
 
-        rx_layer(w[-2 * n_qubits:-n_qubits])
-        rz_layer(w[-n_qubits:])
+        rx_layer(w[-2 * qubits:-qubits])
+        rz_layer(w[-qubits:])
 
 
 class Circuit6(QuantumCircuit):
@@ -111,18 +111,18 @@ class Circuit6(QuantumCircuit):
         self.q_params = nn.Parameter(delta * torch.randn(self.params_per_layer * depth))
 
     @staticmethod
-    def layer(n_qubits, w):
-        rx_layer(w[:n_qubits])
-        rz_layer(w[n_qubits:2 * n_qubits])
+    def layer(qubits, w):
+        rx_layer(w[:qubits])
+        rz_layer(w[qubits:2 * qubits])
 
-        for i in range(n_qubits):
-            for j in range(n_qubits):
+        for i in range(qubits):
+            for j in range(qubits):
                 if i == j:
                     continue
-                qml.CRX(2 * n_qubits + i * (n_qubits - 1) + j, wires=[i, j])
+                qml.CRX(2 * qubits + i * (qubits - 1) + j, wires=[i, j])
 
-        rx_layer(w[-2 * n_qubits:-n_qubits])
-        rz_layer(w[-n_qubits:])
+        rx_layer(w[-2 * qubits:-qubits])
+        rz_layer(w[-qubits:])
 
 
 class Circuit9(QuantumCircuit):
@@ -133,9 +133,9 @@ class Circuit9(QuantumCircuit):
         self.q_params = nn.Parameter(delta * torch.randn(self.params_per_layer * depth))
 
     @staticmethod
-    def layer(n_qubits, w):
-        h_layer(n_qubits)
-        for i in range(n_qubits):
+    def layer(qubits, w):
+        h_layer(qubits)
+        for i in range(qubits):
             qml.CZ(wires=[i, i + 1])
         rx_layer(w)
 
@@ -149,16 +149,16 @@ class Circuit11(QuantumCircuit):
         self.q_params = nn.Parameter(delta * torch.randn(self.params_per_layer * depth))
 
     @staticmethod
-    def layer(n_qubits, w):
-        ry_layer(w[:n_qubits])
-        rz_layer(w[n_qubits:2 * n_qubits])
-        for i in range(0, n_qubits - 1, 2):
+    def layer(qubits, w):
+        ry_layer(w[:qubits])
+        rz_layer(w[qubits:2 * qubits])
+        for i in range(0, qubits - 1, 2):
             qml.CNOT(wires=[i, i + 1])
-        for i in range(1, n_qubits - 1):
-            qml.RY(w[2 * n_qubits + i - 1], wires=i)
-        for i in range(1, n_qubits - 1):
-            qml.RZ(w[2 * n_qubits + n_qubits // 2 + i - 1], wires=i)
-        for i in range(1, n_qubits - 1, 2):
+        for i in range(1, qubits - 1):
+            qml.RY(w[2 * qubits + i - 1], wires=i)
+        for i in range(1, qubits - 1):
+            qml.RZ(w[2 * qubits + qubits // 2 + i - 1], wires=i)
+        for i in range(1, qubits - 1, 2):
             qml.CNOT(wires=[i, i + 1])
 
 
@@ -170,19 +170,19 @@ class Circuit13(QuantumCircuit):
         self.q_params = nn.Parameter(delta * torch.randn(self.params_per_layer * depth))
 
     @staticmethod
-    def layer(n_qubits, w):
-        ry_layer(w[:n_qubits])
-        wire_list = list(range(n_qubits))
-        for i in range(n_qubits):
-            qml.CRZ(w[n_qubits+i], wires=[i, wire_list[i-1]])
+    def layer(qubits, w):
+        ry_layer(w[:qubits])
+        wire_list = list(range(qubits))
+        for i in range(qubits):
+            qml.CRZ(w[qubits+i], wires=[i, wire_list[i-1]])
 
-        ry_layer(w[2*n_qubits:3*n_qubits])
+        ry_layer(w[2*qubits:3*qubits])
 
         # this doesn't generate it exactly as outlined in the paper
-        iterations = list(range(n_qubits - 1, -1, -1))
+        iterations = list(range(qubits - 1, -1, -1))
         iterations.append(iterations.pop(0))
         for i in iterations:
-            qml.CRZ(w[3*n_qubits+i], wires=[wire_list[i-1], i])
+            qml.CRZ(w[3*qubits+i], wires=[wire_list[i-1], i])
 
 
 class Circuit19(QuantumCircuit):
@@ -193,9 +193,9 @@ class Circuit19(QuantumCircuit):
         self.q_params = nn.Parameter(delta * torch.randn(self.params_per_layer * depth))
 
     @staticmethod
-    def layer(n_qubits, w):
-        rx_layer(w[:n_qubits])
-        rz_layer(w[n_qubits:])
+    def layer(qubits, w):
+        rx_layer(w[:qubits])
+        rz_layer(w[qubits:])
         qml.CRX(w[8], wires=[0, 3])
         qml.CRX(w[9], wires=[3, 2])
         qml.CRX(w[10], wires=[2, 1])

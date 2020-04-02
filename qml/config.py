@@ -71,7 +71,7 @@ train_arg.add_argument("--batch_size", type=int,
                        default=4,
                        help="Size of each training batch")
 
-train_arg.add_argument("--num_epoch", type=int,
+train_arg.add_argument("--epochs", type=int,
                        default=5,
                        help="Number of epochs to train")
 
@@ -79,9 +79,6 @@ train_arg.add_argument("--val_intv", type=int,
                        default=4,
                        help="Validation interval")
 
-train_arg.add_argument("--rep_intv", type=int,
-                       default=4,
-                       help="Report interval")
 
 train_arg.add_argument("--log_dir", type=str,
                        default="./logs",
@@ -91,7 +88,8 @@ train_arg.add_argument("--save_dir", type=str,
                        default="./save",
                        help="Directory to save the best model")
 
-train_arg.add_argument("--resume", type=str2bool,
+train_arg.add_argument("--resume",
+                       action='store_true',
                        default=False,
                        help="Whether to resume training from existing checkpoint")
 # ----------------------------------------
@@ -102,7 +100,7 @@ model_arg.add_argument("--circuit", type=str,
                        default="XanaduCircuit",
                        help="Quantum circuit used in model")
 
-model_arg.add_argument("--n_qubits", type=int,
+model_arg.add_argument("--qubits", type=int,
                        default=4,
                        help="Number of qubits in quantum circuit")
 

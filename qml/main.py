@@ -6,6 +6,8 @@ https://pennylane.ai/qml/demos/tutorial_quantum_transfer_learning.html
 
 import os
 import copy
+import shutil
+import time
 
 import torch
 import numpy as np
@@ -20,7 +22,6 @@ from matplotlib import pyplot as plt
 
 from qiskit import IBMQ
 from qiskit.providers.ibmq import least_busy
-
 
 from circuits import *
 from config import get_config, print_usage, print_config
@@ -42,24 +43,24 @@ def get_model(config):
 
         if config.backend is not None:
             IBMQ.load_account()
-            dev = qml.device('qiskit.ibmq', wires=config.n_qubits, backend=config.backend)
+            dev = qml.device('qiskit.ibmq', wires=config.qubits, backend=config.backend)
 
         elif config.dev == "real":
             IBMQ.load_account()
             provider = IBMQ.get_provider(hub='ibm-q')
-            backend = least_busy(provider.backends(filters=lambda x: x.configuration().n_qubits >= config.n_qubits
+            backend = least_busy(provider.backends(filters=lambda x: x.configuration().n_qubits >= config.qubits
                                                                      and not x.configuration().simulator
                                                                      and x.status().operational))
-            dev = qml.device('qiskit.ibmq', wires=config.n_qubits, backend=backend.name())
+            dev = qml.device('qiskit.ibmq', wires=config.qubits, backend=backend.name())
 
         elif config.dev == "forest.qvm":
-            dev = qml.device(config.dev, device=f"{config.n_qubits}q-qvm")
+            dev = qml.device(config.dev, device=f"{config.qubits}q-qvm")
 
         elif config.dev == "forest.pyqvm":
-            dev = qml.device(config.dev, device=f"{config.n_qubits}q-pyqvm")
+            dev = qml.device(config.dev, device=f"{config.qubits}q-pyqvm")
 
         else:
-            dev = qml.device(config.dev, wires=config.n_qubits)
+            dev = qml.device(config.dev, wires=config.qubits)
 
         print("Running on", dev.name)
         model_conv.fc = QuantumNet(config, dev)
@@ -75,15 +76,16 @@ def train_model(config):
     writers = {
         x: SummaryWriter(log_dir=os.path.join(config.log_dir, x)) for x in ['train', 'val']
     }
-    iter_idx = -1
 
     if not os.path.exists(config.log_dir):
         os.makedirs(config.log_dir)
     if not os.path.exists(config.save_dir):
         os.makedirs(config.save_dir)
 
-    bestmodel_file = os.path.join(config.save_dir, f"{config.dev}_{config.circuit}_best.pth")
-    trainmodel_file = os.path.join(config.save_dir, f"{config.dev}_{config.circuit}_train.pth")
+    bestmodel_file = os.path.join(config.save_dir,
+                                  f"{config.circuit}_{config.qubits}_{config.depth}_{config.epochs}_best.pth")
+    trainmodel_file = os.path.join(config.save_dir,
+                                   f"{config.circuit}_{config.qubits}_{config.depth}_{config.epochs}_train.pth")
 
     data_transforms = {
         'train': transforms.Compose([
@@ -116,19 +118,36 @@ def train_model(config):
     model = get_model(config).to(device)
 
     cost = nn.CrossEntropyLoss()
-
     # optimizer = optim.SGD(model.fc.parameters(), lr=config.learning_rate, momentum=0.9)
     optimizer = optim.Adam(model.fc.parameters(), lr=config.learning_rate)
     scheduler = lr_scheduler.StepLR(optimizer, step_size=7)
 
+    iter_idx = -1
+    best_acc = 0
+
+    epoch = 0
+    if os.path.exists(bestmodel_file):
+        if config.resume:
+            print("Checkpoint found!")
+            load_res = torch.load(bestmodel_file)
+            iter_idx = load_res["iter_idx"]
+            best_acc = load_res["best_acc"]
+            epoch = load_res["epoch"] + 1
+            model.load_state_dict(load_res["model"])
+            optimizer.load_state_dict(load_res["optimizer"])
+        else:
+            os.remove(bestmodel_file)
+
     best_model_wts = copy.deepcopy(model.state_dict())
-    best_acc = 0.0
-    for epoch in range(config.num_epoch):
+    while epoch < config.epochs:
+        # for epoch in range(config.epochs):
 
         # Each epoch has a training and validation phase
         for phase in ['train', 'val']:
             if phase == 'train':
                 model.train()  # Set model to training mode
+            elif epoch % config.val_intv != 0:
+                continue
             else:
                 model.eval()  # Set model to evaluate mode
 
@@ -174,12 +193,12 @@ def train_model(config):
             if phase == 'val' and epoch_acc > best_acc:
                 best_acc = epoch_acc
                 best_model_wts = copy.deepcopy(model.state_dict())
-
                 torch.save({
                     "model": model.state_dict(),
                     "optimizer": optimizer.state_dict(),
                     "iter_idx": iter_idx,
-                    "best_va_acc": best_acc
+                    "best_acc": best_acc,
+                    "epoch": epoch
                 }, bestmodel_file)
 
             if phase == "train":
@@ -187,10 +206,11 @@ def train_model(config):
                     "model": model.state_dict(),
                     "optimizer": optimizer.state_dict(),
                     "iter_idx": iter_idx,
-                    "best_va_acc": best_acc
+                    "best_va_acc": best_acc,
+                    "epoch": epoch
                 }, trainmodel_file)
 
-        print()
+        epoch += 1
 
     time_elapsed = time.time() - since
     print('Training complete in {:.0f}m {:.0f}s'.format(
@@ -230,8 +250,10 @@ def test(config):
     if torch.cuda.is_available():
         model = model.cuda()
 
-    bestmodel_file = os.path.join(config.save_dir, f"{config.dev}_{config.circuit}_best.pth")
-    trainmodel_file = os.path.join(config.save_dir, f"{config.dev}_{config.circuit}_train.pth")
+    bestmodel_file = os.path.join(config.save_dir,
+                                  f"{config.circuit}_{config.qubits}_{config.depth}_{config.epochs}_best.pth")
+    trainmodel_file = os.path.join(config.save_dir,
+                                   f"{config.circuit}_{config.qubits}_{config.depth}_{config.epochs}_train.pth")
 
     try:
         print(f"Trying to load {bestmodel_file}...")
@@ -330,6 +352,10 @@ if __name__ == "__main__":
         print_usage()
         exit(1)
     print_config(config)
-    import time
 
+    try:
+        shutil.rmtree(config.log_dir)
+        time.sleep(5)
+    except FileNotFoundError:
+        pass
     main(config)

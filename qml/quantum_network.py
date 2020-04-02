@@ -12,12 +12,12 @@ import circuits
 class QuantumNet(nn.Module):
     def __init__(self, config, dev):
         super().__init__()
-        self.pre_net = nn.Linear(512, config.n_qubits)
+        self.pre_net = nn.Linear(512, config.qubits)
 
         module = getattr(circuits, f"{config.circuit}")
-        self.q_net = module(config.n_qubits, config.depth, config.q_delta, dev)
+        self.q_net = module(config.qubits, config.depth, config.q_delta, dev)
 
-        self.post_net = nn.Linear(config.n_qubits, 2)
+        self.post_net = nn.Linear(config.qubits, 2)
 
     def forward(self, input_features):
         pre_out = self.pre_net(input_features)
