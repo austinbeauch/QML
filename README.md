@@ -6,8 +6,6 @@ This work is based off the [Xanadu AI tutorial](https://pennylane.ai/qml/demos/t
  The Xanadu notebook as been refactored into a more traditional machine learning library, consisting of a main 
  testing/training script, a classical neural network module, and various quantum modules. The purpose is to give 
  researchers an library for developing and testing quantum machine learning algorithms and architectures.
- Currently, only a single quantum variational circuit has been implemented with tuneable hyperparameters from
- the command line.
  
 
 ## Usage
