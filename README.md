@@ -31,7 +31,7 @@ Example training usage might be:
 ```
 
 (note that n_qubits refers to the number of nodes in each layer of a classical analogue. Interesting for comparing
-quantum to classical for the same architecture, however on our hymenoptera dataset the default depth of 6 of 4 nodes
+quantum to classical for the same architecture, however on our hymenoptera dataset the default depth of 6 nodes
 results in overfiting)
 
 ## Creating Custom Circuits
