@@ -1,7 +1,7 @@
 # QML
 Quantum Machine Learning Undergraduate Project Repo
 
-This work is based off the [Xanadu AI tutorial](https://pennylane.ai/qml/demos/tutorial_quantum_transfer_learning.html]) [1]
+This work is based off the [Xanadu AI tutorial](https://pennylane.ai/qml/demos/tutorial_quantum_transfer_learning.html) [1]
  for quantum transfer learning and aims to provide a framework for quantum transfer learning applications. 
  The Xanadu notebook as been refactored into a more traditional machine learning library, consisting of a main 
  testing/training script, a classical neural network module, and various quantum modules. The purpose is to give 
